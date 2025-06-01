@@ -1473,6 +1473,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/listings" element={<Listings />} />
+            <Route path="/listings/:listingId" element={<ListingDetail />} />
+            <Route path="/create-listing" element={<CreateListing />} />
+            <Route path="/my-listings" element={<MyListings />} />
           </Routes>
         </div>
       </Router>
