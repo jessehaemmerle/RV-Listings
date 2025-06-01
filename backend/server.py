@@ -15,7 +15,7 @@ from typing import List, Optional, Dict, Any
 import uuid
 import smtplib
 from email.mime.text import MIMEText
-from email.mime.multipart import MimeMultipart
+from email.mime.multipart import MIMEMultipart
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
