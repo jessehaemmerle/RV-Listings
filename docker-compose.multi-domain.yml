@@ -55,7 +55,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: Dockerfile.frontend.multi
       args:
         - REACT_APP_BACKEND_URL=https://${DOMAIN_NAME}
     container_name: ${COMPOSE_PROJECT_NAME:-rv-classifieds}-frontend
