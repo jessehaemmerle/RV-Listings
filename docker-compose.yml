@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: rv-classifieds-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: rv_classifieds
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - rv-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: rv-classifieds-backend
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://rvuser:rvpass123@mongodb:27017/rv_classifieds
+      - DB_NAME=rv_classifieds
+    depends_on:
+      - mongodb
+    ports:
+      - "8000:8000"
+    networks:
+      - rv-network
+    volumes:
+      - ./backend:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rv-classifieds-frontend
+    restart: unless-stopped
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - rv-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  rv-network:
+    driver: bridge
