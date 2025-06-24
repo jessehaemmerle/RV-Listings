@@ -51,8 +51,8 @@ docker compose logs -f
 
 ## 🌐 Access Your Application
 
-- **Frontend**: http://your-server-ip (port 80)
-- **Backend API**: http://your-server-ip/api/stats
+- **Frontend**: http://your-server-ip:8080 (port 8080)
+- **Backend API**: http://your-server-ip:8080/api/stats
 - **Health Check**: All containers have built-in health monitoring
 
 ## 🔧 Configuration
