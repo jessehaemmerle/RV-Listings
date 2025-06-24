@@ -88,6 +88,9 @@ const useAuth = () => {
   return context;
 };
 
+// Export useAuth hook for use in other components
+export { useAuth };
+
 // Language Switcher Component
 const LanguageSwitcher = () => {
   const { language, changeLanguage, availableLanguages } = useTranslation();
