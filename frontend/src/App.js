@@ -5,6 +5,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 import { TranslationProvider, useTranslation } from './translations/TranslationContext';
+import CreateListing from './components/CreateListing';
+import MyListings from './components/MyListings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
