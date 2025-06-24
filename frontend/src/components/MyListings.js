@@ -2,28 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from '../translations/TranslationContext';
+import { useAuth } from '../App';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
-
-// Auth Context Hook (replicated here for component use)
-const AuthContext = React.createContext();
-
-const useAuth = () => {
-  const context = React.useContext(AuthContext);
-  if (!context) {
-    // Fallback: try to get user info from localStorage
-    const token = localStorage.getItem('token');
-    if (token) {
-      return { 
-        user: { id: 'user', full_name: 'User' }, // Basic user info
-        token 
-      };
-    }
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
 
 const MyListings = () => {
   const { t } = useTranslation();
