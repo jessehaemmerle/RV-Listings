@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_PASSWORD: SecurePassword123!
       MONGO_INITDB_DATABASE: rv_classifieds
     volumes:
       - mongodb_data:/data/db
@@ -23,7 +23,7 @@ services:
     container_name: rv-classifieds-backend
     restart: unless-stopped
     environment:
-      - MONGO_URL=mongodb://rvuser:rvpass123@mongodb:27017/rv_classifieds
+      - MONGO_URL=mongodb://rvuser:SecureRVPass456!@mongodb:27017/rv_classifieds
       - DB_NAME=rv_classifieds
     depends_on:
       - mongodb
