@@ -919,8 +919,8 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/listings" element={<Listings />} />
               <Route path="/listings/:id" element={<ListingDetails />} />
-              <Route path="/create-listing" element={<CreateListing />} />
-              <Route path="/my-listings" element={<MyListings />} />
+              <Route path="/create-listing" element={<CreateListingPlaceholder />} />
+              <Route path="/my-listings" element={<MyListingsPlaceholder />} />
             </Routes>
           </div>
         </Router>
