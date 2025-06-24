@@ -12,8 +12,7 @@ services:
     volumes:
       - mongodb_data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-    ports:
-      - "27017:27017"
+    # MongoDB port not exposed externally for security
     networks:
       - rv-network
 
@@ -28,12 +27,9 @@ services:
       - DB_NAME=rv_classifieds
     depends_on:
       - mongodb
-    ports:
-      - "8000:8000"
+    # Backend port not exposed externally, accessed via nginx proxy
     networks:
       - rv-network
-    volumes:
-      - ./backend:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/stats"]
       interval: 30s
@@ -47,11 +43,11 @@ services:
     container_name: rv-classifieds-frontend
     restart: unless-stopped
     environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8000
+      - REACT_APP_BACKEND_URL=http://localhost
     depends_on:
       - backend
     ports:
-      - "3000:80"
+      - "80:80"
     networks:
       - rv-network
 
