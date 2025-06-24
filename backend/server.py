@@ -256,6 +256,46 @@ async def get_my_listings(current_user: User = Depends(get_current_user)):
     listings = await db.listings.find({"seller_id": current_user.id}).sort("created_at", -1).to_list(100)
     return [Listing(**listing) for listing in listings]
 
+@api_router.put("/listings/{listing_id}", response_model=Listing)
+async def update_listing(
+    listing_id: str, 
+    listing_data: ListingCreate, 
+    current_user: User = Depends(get_current_user)
+):
+    # Check if listing exists and belongs to current user
+    existing_listing = await db.listings.find_one({"id": listing_id, "seller_id": current_user.id})
+    if not existing_listing:
+        raise HTTPException(status_code=404, detail="Listing not found or you don't have permission to edit it")
+    
+    # Update listing
+    listing_dict = listing_data.dict()
+    listing_dict["seller_id"] = current_user.id
+    listing_dict["seller_name"] = current_user.full_name
+    listing_dict["seller_email"] = current_user.email
+    listing_dict["seller_phone"] = current_user.phone
+    listing_dict["updated_at"] = datetime.utcnow()
+    
+    await db.listings.update_one({"id": listing_id}, {"$set": listing_dict})
+    
+    # Return updated listing
+    updated_listing = await db.listings.find_one({"id": listing_id})
+    return Listing(**updated_listing)
+
+@api_router.delete("/listings/{listing_id}")
+async def delete_listing(listing_id: str, current_user: User = Depends(get_current_user)):
+    # Check if listing exists and belongs to current user
+    existing_listing = await db.listings.find_one({"id": listing_id, "seller_id": current_user.id})
+    if not existing_listing:
+        raise HTTPException(status_code=404, detail="Listing not found or you don't have permission to delete it")
+    
+    # Soft delete by setting is_active to False
+    await db.listings.update_one(
+        {"id": listing_id}, 
+        {"$set": {"is_active": False, "deleted_at": datetime.utcnow()}}
+    )
+    
+    return {"message": "Listing deleted successfully"}
+
 @api_router.post("/contact-seller")
 async def contact_seller(message_data: ContactMessage):
     # Get listing details
