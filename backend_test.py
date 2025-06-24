@@ -476,6 +476,189 @@ def test_search_filter():
         print("Failed to create test listings")
         return False
 
+def test_update_listing():
+    """Test updating a listing"""
+    print("\n=== Testing Update Listing ===")
+    global auth_token
+    
+    if not auth_token:
+        print("No auth token available. Logging in...")
+        test_login()
+    
+    # Ensure we have at least one listing
+    if not test_listings:
+        print("No test listings available. Creating one...")
+        test_create_listing()
+    
+    if test_listings:
+        listing_id = test_listings[0]["id"]
+        
+        # Test with valid data and authentication
+        updated_data = create_test_listing()
+        updated_data["title"] = f"Updated: {updated_data['title']}"
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        
+        response = requests.put(f"{API_URL}/listings/{listing_id}", json=updated_data, headers=headers)
+        success = response.status_code == 200
+        message = f"Status: {response.status_code}, Response: {response.text[:200]}..."
+        print_test_result("Update listing with valid data", success, message)
+        
+        if success:
+            try:
+                updated_listing = response.json()
+                print(f"Updated listing title: {updated_listing['title']}")
+                # Update our test listing with the updated data
+                for i, listing in enumerate(test_listings):
+                    if listing["id"] == listing_id:
+                        test_listings[i] = updated_listing
+                        break
+            except Exception as e:
+                print(f"Error extracting updated listing data: {e}")
+                success = False
+        
+        # Test without authentication
+        response = requests.put(f"{API_URL}/listings/{listing_id}", json=updated_data)
+        no_auth_success = response.status_code == 401 or response.status_code == 403
+        message = f"Status: {response.status_code}, Response: {response.text}"
+        print_test_result("Update listing without authentication (should fail)", no_auth_success, message)
+        
+        # Create a second user to test permission check
+        second_user = create_test_user()
+        register_response = requests.post(f"{API_URL}/register", json=second_user)
+        if register_response.status_code == 200:
+            login_data = {
+                "username": second_user["username"],
+                "password": second_user["password"]
+            }
+            login_response = requests.post(f"{API_URL}/login", json=login_data)
+            if login_response.status_code == 200:
+                second_token = login_response.json()["access_token"]
+                
+                # Try to update the listing with the second user's token
+                headers = {"Authorization": f"Bearer {second_token}"}
+                response = requests.put(f"{API_URL}/listings/{listing_id}", json=updated_data, headers=headers)
+                permission_success = response.status_code == 404  # Should return 404 for not found or no permission
+                message = f"Status: {response.status_code}, Response: {response.text}"
+                print_test_result("Update listing with different user (should fail)", permission_success, message)
+                
+                success = success and permission_success
+        
+        return success and no_auth_success
+    else:
+        print("Failed to create test listings")
+        return False
+
+def test_delete_listing():
+    """Test deleting a listing"""
+    print("\n=== Testing Delete Listing ===")
+    global auth_token
+    
+    if not auth_token:
+        print("No auth token available. Logging in...")
+        test_login()
+    
+    # Create a new listing specifically for deletion
+    listing_data = create_test_listing()
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    
+    create_response = requests.post(f"{API_URL}/listings", json=listing_data, headers=headers)
+    if create_response.status_code != 200:
+        print(f"Failed to create test listing for deletion: {create_response.text}")
+        return False
+    
+    listing_id = create_response.json()["id"]
+    print(f"Created listing with ID: {listing_id} for deletion test")
+    
+    # Test with valid authentication
+    response = requests.delete(f"{API_URL}/listings/{listing_id}", headers=headers)
+    success = response.status_code == 200
+    message = f"Status: {response.status_code}, Response: {response.text}"
+    print_test_result("Delete listing with valid authentication", success, message)
+    
+    # Verify the listing is soft-deleted (is_active = false)
+    get_response = requests.get(f"{API_URL}/listings/{listing_id}")
+    soft_delete_success = get_response.status_code == 404  # Should be not found after deletion
+    message = f"Status: {get_response.status_code}, Response: {get_response.text}"
+    print_test_result("Verify listing is soft-deleted", soft_delete_success, message)
+    
+    # Test without authentication
+    # Create another listing for this test
+    create_response = requests.post(f"{API_URL}/listings", json=listing_data, headers=headers)
+    if create_response.status_code != 200:
+        print(f"Failed to create second test listing for deletion: {create_response.text}")
+        return False
+    
+    second_listing_id = create_response.json()["id"]
+    
+    response = requests.delete(f"{API_URL}/listings/{second_listing_id}")
+    no_auth_success = response.status_code == 401 or response.status_code == 403
+    message = f"Status: {response.status_code}, Response: {response.text}"
+    print_test_result("Delete listing without authentication (should fail)", no_auth_success, message)
+    
+    # Create a second user to test permission check
+    second_user = create_test_user()
+    register_response = requests.post(f"{API_URL}/register", json=second_user)
+    if register_response.status_code == 200:
+        login_data = {
+            "username": second_user["username"],
+            "password": second_user["password"]
+        }
+        login_response = requests.post(f"{API_URL}/login", json=login_data)
+        if login_response.status_code == 200:
+            second_token = login_response.json()["access_token"]
+            
+            # Try to delete the listing with the second user's token
+            headers = {"Authorization": f"Bearer {second_token}"}
+            response = requests.delete(f"{API_URL}/listings/{second_listing_id}", headers=headers)
+            permission_success = response.status_code == 404  # Should return 404 for not found or no permission
+            message = f"Status: {response.status_code}, Response: {response.text}"
+            print_test_result("Delete listing with different user (should fail)", permission_success, message)
+            
+            success = success and permission_success
+    
+    return success and no_auth_success and soft_delete_success
+
+def test_create_listing_with_different_vehicle_types():
+    """Test creating listings with different vehicle types"""
+    print("\n=== Testing Create Listing with Different Vehicle Types ===")
+    global auth_token
+    
+    if not auth_token:
+        print("No auth token available. Logging in...")
+        test_login()
+    
+    vehicle_types = ["caravan", "motorhome", "camper_van"]
+    success = True
+    
+    for vehicle_type in vehicle_types:
+        # Create listing with specific vehicle type
+        listing_data = create_test_listing()
+        listing_data["vehicle_type"] = vehicle_type
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        
+        response = requests.post(f"{API_URL}/listings", json=listing_data, headers=headers)
+        type_success = response.status_code == 200
+        message = f"Status: {response.status_code}, Response: {response.text[:100]}..."
+        print_test_result(f"Create listing with vehicle type: {vehicle_type}", type_success, message)
+        
+        if type_success:
+            try:
+                listing = response.json()
+                test_listings.append(listing)
+                print(f"Created {vehicle_type} listing with ID: {listing['id']}")
+                
+                # Verify the vehicle type was saved correctly
+                if listing["vehicle_type"] != vehicle_type:
+                    print(f"ERROR: Vehicle type mismatch. Expected {vehicle_type}, got {listing['vehicle_type']}")
+                    type_success = False
+            except Exception as e:
+                print(f"Error extracting listing data: {e}")
+                type_success = False
+        
+        success = success and type_success
+    
+    return success
+
 def run_all_tests():
     """Run all tests and return overall success status"""
     print("\n======================================")
@@ -492,9 +675,12 @@ def run_all_tests():
     
     # Listings tests
     listings_success = test_create_listing()
+    listings_success = test_create_listing_with_different_vehicle_types() and listings_success
     listings_success = test_get_listings() and listings_success
     listings_success = test_get_single_listing() and listings_success
     listings_success = test_get_my_listings() and listings_success
+    listings_success = test_update_listing() and listings_success
+    listings_success = test_delete_listing() and listings_success
     listings_success = test_search_filter() and listings_success
     
     # Utility tests
