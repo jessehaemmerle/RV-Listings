@@ -58,11 +58,3 @@ volumes:
 networks:
   rv-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
-    driver: local
-
-networks:
-  rv-network:
-    driver: bridge
