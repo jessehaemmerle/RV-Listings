@@ -1,10 +1,10 @@
-// MongoDB initialization script
+// MongoDB initialization script for production
 db = db.getSiblingDB('rv_classifieds');
 
-// Create user for the application
+// Create user for the application with secure password
 db.createUser({
   user: 'rvuser',
-  pwd: 'rvpass123',
+  pwd: 'SecureRVPass456!',
   roles: [
     {
       role: 'readWrite',
@@ -27,4 +27,13 @@ db.listings.createIndex({ "price": 1 });
 db.listings.createIndex({ "created_at": -1 });
 db.listings.createIndex({ "location.latitude": 1, "location.longitude": 1 });
 
-print('Database initialized successfully');
+// Create text index for search functionality
+db.listings.createIndex({
+  "title": "text",
+  "description": "text",
+  "vehicle_type": "text",
+  "make": "text",
+  "model": "text"
+});
+
+print('Production database initialized successfully with secure configuration');
