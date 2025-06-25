@@ -23,7 +23,7 @@ def create_test_user():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return {
         "username": f"privacy_test_{timestamp}",
-        "email": f"privacy_test_{timestamp}@test.local",
+        "email": f"privacy.test.{timestamp}@example.com",
         "password": "TestPassword123!",
         "full_name": f"Privacy Test User {timestamp}",
         "phone": "+43 123 456 789"
