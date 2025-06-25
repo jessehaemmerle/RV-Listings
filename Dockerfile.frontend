@@ -12,6 +12,10 @@ RUN yarn install
 # Copy source code
 COPY frontend/ .
 
+# Set build-time environment variable for React
+ARG REACT_APP_BACKEND_URL=""
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+
 # Build the application for production
 RUN yarn build
 
