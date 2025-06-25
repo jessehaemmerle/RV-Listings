@@ -226,3 +226,151 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }
+
+/* Mobile-optimized CSS additions */
+@media (max-width: 768px) {
+  /* Ensure mobile navigation doesn't overflow */
+  .mobile-nav-container {
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  /* Better touch targets for mobile */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Responsive text sizes */
+  .mobile-text-responsive {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+
+  /* Card spacing on mobile */
+  .mobile-card-spacing {
+    margin-bottom: 1rem;
+  }
+
+  /* Better button sizing on mobile */
+  .mobile-button {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Touch-friendly interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  .hover-touch {
+    transform: none !important;
+  }
+  
+  .hover-touch:active {
+    transform: scale(0.98);
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Improved mobile modal overlays */
+@media (max-width: 768px) {
+  .mobile-modal {
+    margin: 0;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .mobile-modal-content {
+    padding: 1.5rem 1rem;
+  }
+}
+
+/* Better spacing for mobile forms */
+@media (max-width: 640px) {
+  .mobile-form-spacing {
+    padding: 1rem;
+  }
+  
+  .mobile-form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Mobile-first responsive grid */
+.mobile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Accessibility improvements for mobile */
+.mobile-focus-visible:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Safe area insets for devices with notches */
+@supports (padding: max(0px)) {
+  .safe-area-inset-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-inset-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Better mobile typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+
+/* Mobile-optimized shadows */
+@media (max-width: 768px) {
+  .mobile-shadow {
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  }
+  
+  .mobile-shadow-lg {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+}

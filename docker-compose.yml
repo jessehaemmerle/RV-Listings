@@ -40,10 +40,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        REACT_APP_BACKEND_URL: ""
     container_name: rv-classifieds-frontend
     restart: unless-stopped
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8080
     depends_on:
       - backend
     ports:

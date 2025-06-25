@@ -7,8 +7,13 @@ import './App.css';
 import { TranslationProvider, useTranslation } from './translations/TranslationContext';
 import CreateListing from './components/CreateListing';
 import MyListings from './components/MyListings';
+import CookieConsent from './components/CookieConsent';
+import Impressum from './components/Impressum';
+import Datenschutz from './components/Datenschutz';
+import AGB from './components/AGB';
+import PrivacySettings from './components/PrivacySettings';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 // Fix for default markers in Leaflet
@@ -117,20 +122,29 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when clicking outside
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setIsMenuOpen(false);
+  };
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="bg-white shadow-lg border-b border-gray-200 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">WM</span>
+                <span className="text-white font-bold text-sm">WM</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">{t('nav.brand')}</span>
+              <span className="text-lg md:text-xl font-bold text-gray-900">{t('nav.brand')}</span>
             </Link>
           </div>
 
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/listings" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
               {t('nav.browseLisings')}
@@ -142,6 +156,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/my-listings" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                   {t('nav.myListings')}
+                </Link>
+                <Link to="/privacy" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                  🔒 Datenschutz
                 </Link>
                 <div className="relative">
                   <button
@@ -176,6 +193,152 @@ const Navbar = () => {
               </>
             )}
             <LanguageSwitcher />
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Hauptmenü öffnen</span>
+              {!isMobileMenuOpen ? (
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              ) : (
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200 shadow-lg">
+          {/* Main Navigation */}
+          <Link
+            to="/listings"
+            className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+            onClick={closeMobileMenu}
+          >
+            📋 {t('nav.browseLisings')}
+          </Link>
+
+          {user ? (
+            <>
+              {/* Authenticated User Menu */}
+              <div className="border-t border-gray-200 pt-2">
+                <div className="flex items-center px-3 py-2">
+                  <div className="flex-shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
+                      <span className="text-xs font-medium text-white">
+                        {user.full_name?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-sm font-medium text-gray-800">{user.full_name}</div>
+                    <div className="text-xs text-gray-500">{user.email}</div>
+                  </div>
+                </div>
+              </div>
+
+              <Link
+                to="/create-listing"
+                className="bg-blue-600 text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={closeMobileMenu}
+              >
+                ➕ {t('nav.postListing')}
+              </Link>
+
+              <Link
+                to="/my-listings"
+                className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={closeMobileMenu}
+              >
+                📄 {t('nav.myListings')}
+              </Link>
+
+              <Link
+                to="/privacy"
+                className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={closeMobileMenu}
+              >
+                🔒 Datenschutz
+              </Link>
+
+              <button
+                onClick={() => {
+                  logout();
+                  closeMobileMenu();
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 block w-full text-left px-3 py-2 rounded-md text-base font-medium"
+              >
+                🚪 {t('nav.logout')}
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Guest User Menu */}
+              <Link
+                to="/login"
+                className="text-gray-700 hover:text-blue-600 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={closeMobileMenu}
+              >
+                🔑 {t('nav.login')}
+              </Link>
+
+              <Link
+                to="/register"
+                className="bg-blue-600 text-white hover:bg-blue-700 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={closeMobileMenu}
+              >
+                👤 {t('nav.register')}
+              </Link>
+            </>
+          )}
+
+          {/* Legal Links */}
+          <div className="border-t border-gray-200 pt-2">
+            <div className="px-3 py-2">
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Rechtliches</div>
+            </div>
+            <Link
+              to="/impressum"
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 block px-3 py-2 rounded-md text-sm"
+              onClick={closeMobileMenu}
+            >
+              ℹ️ Impressum
+            </Link>
+            <Link
+              to="/datenschutz"
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 block px-3 py-2 rounded-md text-sm"
+              onClick={closeMobileMenu}
+            >
+              🛡️ Datenschutz
+            </Link>
+            <Link
+              to="/agb"
+              className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 block px-3 py-2 rounded-md text-sm"
+              onClick={closeMobileMenu}
+            >
+              📜 AGB
+            </Link>
+          </div>
+
+          {/* Language Switcher */}
+          <div className="border-t border-gray-200 pt-2">
+            <div className="px-3 py-2">
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">Sprache</div>
+              <div className="mt-2">
+                <LanguageSwitcher />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -534,6 +697,7 @@ const Listings = () => {
     search_text: ''
   });
   const [showMap, setShowMap] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const navigate = useNavigate();
 
@@ -585,19 +749,34 @@ const Listings = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('listings.title')}</h1>
-        <button
-          onClick={() => setShowMap(!showMap)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          {showMap ? t('listings.hideMap') : t('listings.showMap')}
-        </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+      {/* Header - Mobile Optimized */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('listings.title')}</h1>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filter
+          </button>
+          <button
+            onClick={() => setShowMap(!showMap)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            {showMap ? t('listings.hideMap') : t('listings.showMap')}
+          </button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      {/* Filters - Mobile Responsive */}
+      <div className={`bg-white p-4 md:p-6 rounded-lg shadow-md mb-6 md:mb-8 ${showFilters ? 'block' : 'hidden md:block'}`}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.vehicleType')}</label>
@@ -643,10 +822,10 @@ const Listings = () => {
             />
           </div>
         </div>
-        <div className="mt-4 flex space-x-4">
+        <div className="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <button
             onClick={fetchListings}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1 sm:flex-initial"
           >
             {t('listings.filters.applyFilters')}
           </button>
@@ -655,7 +834,7 @@ const Listings = () => {
               setFilters({ vehicle_type: '', min_price: '', max_price: '', search_text: '' });
               fetchListings();
             }}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 flex-1 sm:flex-initial"
           >
             {t('listings.filters.clearFilters')}
           </button>
@@ -664,7 +843,7 @@ const Listings = () => {
 
       {/* Map */}
       {showMap && (
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <MapComponent 
             listings={listings} 
             userLocation={userLocation} 
@@ -673,19 +852,33 @@ const Listings = () => {
         </div>
       )}
 
-      {/* Listings Grid */}
+      {/* Results Count - Mobile Friendly */}
+      <div className="mb-4 text-sm text-gray-600">
+        {loading ? (
+          <span>{t('common.loading')}</span>
+        ) : (
+          <span>{listings.length} Anzeigen gefunden</span>
+        )}
+      </div>
+
+      {/* Listings Grid - Responsive */}
       {loading ? (
         <div className="text-center py-8">
           <div className="text-lg">{t('common.loading')}</div>
         </div>
       ) : listings.length === 0 ? (
         <div className="text-center py-8">
+          <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.1-5.5-2.709" />
+            </svg>
+          </div>
           <div className="text-lg text-gray-600">{t('listings.noListings')}</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {listings.map((listing) => (
-            <div key={listing.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div key={listing.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               {listing.images && listing.images.length > 0 && (
                 <img
                   src={`data:image/jpeg;base64,${listing.images[0]}`}
@@ -694,23 +887,21 @@ const Listings = () => {
                 />
               )}
               <div className="p-4">
-                <h3 className="text-lg font-semibold mb-2">{listing.title}</h3>
+                <h3 className="text-lg font-semibold mb-2 line-clamp-2">{listing.title}</h3>
                 <p className="text-2xl font-bold text-blue-600 mb-2">
                   {t('common.currency')}{listing.price.toLocaleString()}
                 </p>
-                <div className="text-sm text-gray-600 space-y-1">
+                <div className="text-sm text-gray-600 space-y-1 mb-4">
                   <p>{t('listings.card.year')}: {listing.year}</p>
                   <p>{t('listings.card.mileage')}: {listing.mileage} {t('common.km')}</p>
-                  <p>{t('listings.card.location')}: {listing.location.address}</p>
+                  <p className="line-clamp-1">{t('listings.card.location')}: {listing.location.address}</p>
                 </div>
-                <div className="mt-4 flex space-x-2">
-                  <button
-                    onClick={() => navigate(`/listings/${listing.id}`)}
-                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    {t('listings.card.viewDetails')}
-                  </button>
-                </div>
+                <button
+                  onClick={() => navigate(`/listings/${listing.id}`)}
+                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                >
+                  {t('listings.card.viewDetails')}
+                </button>
               </div>
             </div>
           ))}
@@ -898,7 +1089,160 @@ const ListingDetails = () => {
   );
 };
 
-// Simple placeholder components for other pages
+// Footer Component with Legal Links
+const Footer = () => {
+  const { t } = useTranslation();
+
+  return (
+    <footer className="bg-gray-800 text-white mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <div className="md:col-span-1">
+            <h3 className="text-lg font-semibold mb-4">Wohnmobil-Kleinanzeigen</h3>
+            <p className="text-gray-300 text-sm">
+              Ihre Plattform für Wohnmobile, Wohnwagen und Campervans in Österreich.
+            </p>
+          </div>
+
+          {/* Quick Links - Mobile Optimized */}
+          <div className="md:col-span-1">
+            <h4 className="text-md font-semibold mb-4">Schnellzugriff</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/listings" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">📋</span>
+                  Anzeigen durchsuchen
+                </Link>
+              </li>
+              <li>
+                <Link to="/create-listing" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">➕</span>
+                  Anzeige erstellen
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">👤</span>
+                  Registrieren
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal - Mobile Optimized */}
+          <div className="md:col-span-1">
+            <h4 className="text-md font-semibold mb-4">Rechtliches</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/impressum" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">ℹ️</span>
+                  Impressum
+                </Link>
+              </li>
+              <li>
+                <Link to="/datenschutz" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">🛡️</span>
+                  Datenschutz
+                </Link>
+              </li>
+              <li>
+                <Link to="/agb" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">📜</span>
+                  AGB
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-gray-300 hover:text-white flex items-center">
+                  <span className="mr-2">🔒</span>
+                  Privacy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact - Mobile Optimized */}
+          <div className="md:col-span-1">
+            <h4 className="text-md font-semibold mb-4">Kontakt</h4>
+            <div className="text-gray-300 text-sm space-y-2">
+              <div className="flex items-center">
+                <span className="mr-2">📧</span>
+                <span>info@[ihre-domain].at</span>
+              </div>
+              <div className="flex items-center">
+                <span className="mr-2">📞</span>
+                <span>+43 [IHRE NUMMER]</span>
+              </div>
+              <div className="flex items-start">
+                <span className="mr-2 mt-1">📍</span>
+                <div>
+                  <div>[IHRE ADRESSE]</div>
+                  <div>[PLZ] [ORT], Österreich</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-700 mt-8 pt-6">
+          <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
+            <p className="text-gray-400 text-sm text-center md:text-left">
+              © {new Date().getFullYear()} [IHR FIRMENNAME]. Alle Rechte vorbehalten.
+            </p>
+            <div className="flex flex-wrap justify-center md:justify-end gap-4">
+              <span className="text-gray-400 text-xs flex items-center">
+                <span className="mr-1">🇦🇹</span>
+                Made in Austria
+              </span>
+              <span className="text-gray-400 text-xs flex items-center">
+                <span className="mr-1">🔒</span>
+                DSGVO-konform
+              </span>
+              <span className="text-gray-400 text-xs flex items-center">
+                <span className="mr-1">🛡️</span>
+                SSL-verschlüsselt
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Quick Actions Bar */}
+      <div className="md:hidden bg-gray-900 border-t border-gray-700">
+        <div className="grid grid-cols-4 gap-1 p-2">
+          <Link
+            to="/"
+            className="flex flex-col items-center py-2 px-1 text-gray-300 hover:text-white"
+          >
+            <span className="text-lg mb-1">🏠</span>
+            <span className="text-xs">Home</span>
+          </Link>
+          <Link
+            to="/listings"
+            className="flex flex-col items-center py-2 px-1 text-gray-300 hover:text-white"
+          >
+            <span className="text-lg mb-1">🔍</span>
+            <span className="text-xs">Suchen</span>
+          </Link>
+          <Link
+            to="/create-listing"
+            className="flex flex-col items-center py-2 px-1 text-gray-300 hover:text-white"
+          >
+            <span className="text-lg mb-1">➕</span>
+            <span className="text-xs">Inserieren</span>
+          </Link>
+          <Link
+            to="/privacy"
+            className="flex flex-col items-center py-2 px-1 text-gray-300 hover:text-white"
+          >
+            <span className="text-lg mb-1">👤</span>
+            <span className="text-xs">Profil</span>
+          </Link>
+        </div>
+      </div>
+    </footer>
+  );
+};
 const CreateListingPlaceholder = () => {
   const { t } = useTranslation();
   return <CreateListing />;
@@ -924,7 +1268,13 @@ const App = () => {
               <Route path="/listings/:id" element={<ListingDetails />} />
               <Route path="/create-listing" element={<CreateListingPlaceholder />} />
               <Route path="/my-listings" element={<MyListingsPlaceholder />} />
+              <Route path="/impressum" element={<Impressum />} />
+              <Route path="/datenschutz" element={<Datenschutz />} />
+              <Route path="/agb" element={<AGB />} />
+              <Route path="/privacy" element={<PrivacySettings />} />
             </Routes>
+            <Footer />
+            <CookieConsent />
           </div>
         </Router>
       </AuthProvider>

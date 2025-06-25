@@ -31,3 +31,6 @@ curl -f http://localhost:8080 && echo "✅ Frontend is working!" || echo "❌ Fr
 echo ""
 echo "🎉 Fix attempt complete!"
 echo "Try accessing: http://your-server-ip:8080"
+echo ""
+echo "🚐 Deutsche Wohnmobil-Kleinanzeigen sind bereit!"
+echo "   Benutzer können sich registrieren und Anzeigen erstellen."
