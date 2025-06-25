@@ -721,6 +721,7 @@ const MapComponent = ({ listings, userLocation, onListingClick }) => {
 
 const Listings = () => {
   const { t } = useTranslation();
+  const { shouldShowAd, getAdSlot, adConfig } = useAdConfig();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -730,7 +731,6 @@ const Listings = () => {
     search_text: ''
   });
   const [showMap, setShowMap] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const navigate = useNavigate();
 
@@ -781,165 +781,211 @@ const Listings = () => {
     navigate(`/listings/${listingId}`);
   };
 
+  // Function to insert ads between listings
+  const getListingsWithAds = () => {
+    if (!shouldShowAd('listings', 'inFeed') || !adConfig.showInFeedAds) {
+      return listings.map((listing, index) => ({ type: 'listing', data: listing, key: `listing-${index}` }));
+    }
+
+    const result = [];
+    let adCount = 0;
+    const maxAds = adConfig.maxInFeedAds || 3;
+    const frequency = adConfig.adFrequency || 4;
+
+    listings.forEach((listing, index) => {
+      result.push({ type: 'listing', data: listing, key: `listing-${index}` });
+
+      // Insert ad after every nth listing
+      if ((index + 1) % frequency === 0 && adCount < maxAds) {
+        result.push({ 
+          type: 'ad', 
+          data: { adSlot: getAdSlot('inFeed') }, 
+          key: `ad-${adCount}` 
+        });
+        adCount++;
+      }
+    });
+
+    return result;
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-      {/* Header - Mobile Optimized */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{t('listings.title')}</h1>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="md:hidden bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filter
-          </button>
-          <button
-            onClick={() => setShowMap(!showMap)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
-            </svg>
-            {showMap ? t('listings.hideMap') : t('listings.showMap')}
-          </button>
-        </div>
-      </div>
-
-      {/* Filters - Mobile Responsive */}
-      <div className={`bg-white p-4 md:p-6 rounded-lg shadow-md mb-6 md:mb-8 ${showFilters ? 'block' : 'hidden md:block'}`}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.vehicleType')}</label>
-            <select
-              value={filters.vehicle_type}
-              onChange={(e) => handleFilterChange('vehicle_type', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">{t('listings.title')}</h1>
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
-              <option value="">{t('listings.filters.allTypes')}</option>
-              <option value="caravan">{t('listings.filters.caravan')}</option>
-              <option value="motorhome">{t('listings.filters.motorhome')}</option>
-              <option value="camper_van">{t('listings.filters.camperVan')}</option>
-            </select>
+              {showMap ? t('listings.hideMap') : t('listings.showMap')}
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.minPrice')}</label>
-            <input
-              type="number"
-              value={filters.min_price}
-              onChange={(e) => handleFilterChange('min_price', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="€0"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.maxPrice')}</label>
-            <input
-              type="number"
-              value={filters.max_price}
-              onChange={(e) => handleFilterChange('max_price', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="€100.000"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.searchText')}</label>
-            <input
-              type="text"
-              value={filters.search_text}
-              onChange={(e) => handleFilterChange('search_text', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder={t('listings.filters.searchPlaceholder')}
-            />
-          </div>
-        </div>
-        <div className="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-          <button
-            onClick={fetchListings}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex-1 sm:flex-initial"
-          >
-            {t('listings.filters.applyFilters')}
-          </button>
-          <button
-            onClick={() => {
-              setFilters({ vehicle_type: '', min_price: '', max_price: '', search_text: '' });
-              fetchListings();
-            }}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 flex-1 sm:flex-initial"
-          >
-            {t('listings.filters.clearFilters')}
-          </button>
-        </div>
-      </div>
 
-      {/* Map */}
-      {showMap && (
-        <div className="mb-6 md:mb-8">
-          <MapComponent 
-            listings={listings} 
-            userLocation={userLocation} 
-            onListingClick={handleListingClick}
-          />
-        </div>
-      )}
+          {/* Banner Ad */}
+          {shouldShowAd('listings', 'banner') && (
+            <BannerAd adSlot={getAdSlot('banner')} className="mb-8" />
+          )}
 
-      {/* Results Count - Mobile Friendly */}
-      <div className="mb-4 text-sm text-gray-600">
-        {loading ? (
-          <span>{t('common.loading')}</span>
-        ) : (
-          <span>{listings.length} Anzeigen gefunden</span>
-        )}
-      </div>
+          {/* Search Results Ad */}
+          {shouldShowAd('listings', 'searchResults') && filters.search_text && (
+            <SearchResultsAd adSlot={getAdSlot('searchResults')} className="mb-8" />
+          )}
 
-      {/* Listings Grid - Responsive */}
-      {loading ? (
-        <div className="text-center py-8">
-          <div className="text-lg">{t('common.loading')}</div>
-        </div>
-      ) : listings.length === 0 ? (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.1-5.5-2.709" />
-            </svg>
-          </div>
-          <div className="text-lg text-gray-600">{t('listings.noListings')}</div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {listings.map((listing) => (
-            <div key={listing.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              {listing.images && listing.images.length > 0 && (
-                <img
-                  src={`data:image/jpeg;base64,${listing.images[0]}`}
-                  alt={listing.title}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold mb-2 line-clamp-2">{listing.title}</h3>
-                <p className="text-2xl font-bold text-blue-600 mb-2">
-                  {t('common.currency')}{listing.price.toLocaleString()}
-                </p>
-                <div className="text-sm text-gray-600 space-y-1 mb-4">
-                  <p>{t('listings.card.year')}: {listing.year}</p>
-                  <p>{t('listings.card.mileage')}: {listing.mileage} {t('common.km')}</p>
-                  <p className="line-clamp-1">{t('listings.card.location')}: {listing.location.address}</p>
-                </div>
-                <button
-                  onClick={() => navigate(`/listings/${listing.id}`)}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          {/* Filters */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.vehicleType')}</label>
+                <select
+                  value={filters.vehicle_type}
+                  onChange={(e) => handleFilterChange('vehicle_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {t('listings.card.viewDetails')}
-                </button>
+                  <option value="">{t('listings.filters.allTypes')}</option>
+                  <option value="caravan">{t('listings.filters.caravan')}</option>
+                  <option value="motorhome">{t('listings.filters.motorhome')}</option>
+                  <option value="camper_van">{t('listings.filters.camperVan')}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.minPrice')}</label>
+                <input
+                  type="number"
+                  value={filters.min_price}
+                  onChange={(e) => handleFilterChange('min_price', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="€0"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.maxPrice')}</label>
+                <input
+                  type="number"
+                  value={filters.max_price}
+                  onChange={(e) => handleFilterChange('max_price', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="€100.000"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('listings.filters.searchText')}</label>
+                <input
+                  type="text"
+                  value={filters.search_text}
+                  onChange={(e) => handleFilterChange('search_text', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('listings.filters.searchPlaceholder')}
+                />
               </div>
             </div>
-          ))}
+            <div className="mt-4 flex space-x-4">
+              <button
+                onClick={fetchListings}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                {t('listings.filters.applyFilters')}
+              </button>
+              <button
+                onClick={() => {
+                  setFilters({ vehicle_type: '', min_price: '', max_price: '', search_text: '' });
+                  fetchListings();
+                }}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
+                {t('listings.filters.clearFilters')}
+              </button>
+            </div>
+          </div>
+
+          {/* Map */}
+          {showMap && (
+            <div className="mb-8">
+              <MapComponent 
+                listings={listings} 
+                userLocation={userLocation} 
+                onListingClick={handleListingClick}
+              />
+            </div>
+          )}
+
+          {/* Listings Grid with Ads */}
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="text-lg">{t('common.loading')}</div>
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-lg text-gray-600">{t('listings.noListings')}</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {getListingsWithAds().map((item) => (
+                item.type === 'listing' ? (
+                  <div key={item.key} className="bg-white rounded-lg shadow-md overflow-hidden">
+                    {item.data.images && item.data.images.length > 0 && (
+                      <img
+                        src={`data:image/jpeg;base64,${item.data.images[0]}`}
+                        alt={item.data.title}
+                        className="w-full h-48 object-cover"
+                      />
+                    )}
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold mb-2">{item.data.title}</h3>
+                      <p className="text-2xl font-bold text-blue-600 mb-2">
+                        {t('common.currency')}{item.data.price.toLocaleString()}
+                      </p>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>{t('listings.card.year')}: {item.data.year}</p>
+                        <p>{t('listings.card.mileage')}: {item.data.mileage} {t('common.km')}</p>
+                        <p>{t('listings.card.location')}: {item.data.location.address}</p>
+                      </div>
+                      <div className="mt-4 flex space-x-2">
+                        <button
+                          onClick={() => navigate(`/listings/${item.data.id}`)}
+                          className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
+                          {t('listings.card.viewDetails')}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={item.key} className="md:col-span-2">
+                    <InFeedAd adSlot={item.data.adSlot} />
+                  </div>
+                )
+              ))}
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Sidebar with Ads */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-8 space-y-6">
+            {shouldShowAd('listings', 'sidebar') && (
+              <SidebarAd adSlot={getAdSlot('sidebar')} />
+            )}
+            
+            {/* Additional sidebar content can go here */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold mb-4">Beliebte Suchbegriffe</h3>
+              <div className="flex flex-wrap gap-2">
+                {['Wohnwagen', 'Wohnmobil', 'Campervan', 'Adria', 'Dethleffs', 'Hobby'].map(tag => (
+                  <span key={tag} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Sticky Ad */}
+      <MobileStickyAd show={shouldShowAd('listings', 'mobileSticky')} adSlot={getAdSlot('mobileSticky')} />
     </div>
   );
 };
