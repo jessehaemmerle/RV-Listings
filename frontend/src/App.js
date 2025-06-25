@@ -377,6 +377,7 @@ const Hero = () => {
 
 const Home = () => {
   const { t } = useTranslation();
+  const { shouldShowAd, getAdSlot } = useAdConfig();
   const [stats, setStats] = useState({});
 
   useEffect(() => {
@@ -396,61 +397,90 @@ const Home = () => {
     <div>
       <Hero />
       
+      {/* Banner Ad after Hero */}
+      {shouldShowAd('homepage', 'banner') && (
+        <BannerAd adSlot={getAdSlot('banner')} className="container mx-auto px-4" />
+      )}
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.mainTitle')}</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {t('home.description')}
-          </p>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('home.mainTitle')}</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {t('home.description')}
+              </p>
+            </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">{stats.total_listings || 0}</div>
-            <div className="text-gray-600">{t('home.stats.activeListings')}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">{stats.total_users || 0}</div>
-            <div className="text-gray-600">{t('home.stats.registeredUsers')}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600">24/7</div>
-            <div className="text-gray-600">{t('home.stats.supportAvailable')}</div>
-          </div>
-        </div>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">{stats.total_listings || 0}</div>
+                <div className="text-gray-600">{t('home.stats.activeListings')}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">{stats.total_users || 0}</div>
+                <div className="text-gray-600">{t('home.stats.registeredUsers')}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600">24/7</div>
+                <div className="text-gray-600">{t('home.stats.supportAvailable')}</div>
+              </div>
+            </div>
 
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+            {/* Native Ad between stats and features */}
+            {shouldShowAd('homepage', 'native') && (
+              <div className="mb-16">
+                <NativeAd 
+                  adSlot={getAdSlot('native')} 
+                  title="Empfohlene Wohnmobil-Services"
+                />
+              </div>
+            )}
+
+            {/* Features */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{t('home.features.locationSearch.title')}</h3>
+                <p className="text-gray-600">{t('home.features.locationSearch.description')}</p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{t('home.features.advancedFilters.title')}</h3>
+                <p className="text-gray-600">{t('home.features.advancedFilters.description')}</p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{t('home.features.directContact.title')}</h3>
+                <p className="text-gray-600">{t('home.features.directContact.description')}</p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2">{t('home.features.locationSearch.title')}</h3>
-            <p className="text-gray-600">{t('home.features.locationSearch.description')}</p>
           </div>
-          
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">{t('home.features.advancedFilters.title')}</h3>
-            <p className="text-gray-600">{t('home.features.advancedFilters.description')}</p>
-          </div>
-          
-          <div className="text-center p-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-2">{t('home.features.directContact.title')}</h3>
-            <p className="text-gray-600">{t('home.features.directContact.description')}</p>
+
+          {/* Sidebar with Ad */}
+          <div className="lg:col-span-1">
+            {shouldShowAd('homepage', 'sidebar') && (
+              <div className="sticky top-8">
+                <SidebarAd adSlot={getAdSlot('sidebar')} />
+              </div>
+            )}
           </div>
         </div>
       </div>
