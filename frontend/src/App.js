@@ -11,6 +11,7 @@ import CookieConsent from './components/CookieConsent';
 import Impressum from './components/Impressum';
 import Datenschutz from './components/Datenschutz';
 import AGB from './components/AGB';
+import PrivacySettings from './components/PrivacySettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
