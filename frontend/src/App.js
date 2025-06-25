@@ -148,6 +148,9 @@ const Navbar = () => {
                 <Link to="/my-listings" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                   {t('nav.myListings')}
                 </Link>
+                <Link to="/privacy" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                  🔒 Datenschutz
+                </Link>
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
