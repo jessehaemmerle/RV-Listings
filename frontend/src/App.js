@@ -928,7 +928,12 @@ const App = () => {
               <Route path="/listings/:id" element={<ListingDetails />} />
               <Route path="/create-listing" element={<CreateListingPlaceholder />} />
               <Route path="/my-listings" element={<MyListingsPlaceholder />} />
+              <Route path="/impressum" element={<Impressum />} />
+              <Route path="/datenschutz" element={<Datenschutz />} />
+              <Route path="/agb" element={<AGB />} />
             </Routes>
+            <Footer />
+            <CookieConsent />
           </div>
         </Router>
       </AuthProvider>
