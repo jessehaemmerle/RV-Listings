@@ -998,6 +998,7 @@ const App = () => {
               <Route path="/impressum" element={<Impressum />} />
               <Route path="/datenschutz" element={<Datenschutz />} />
               <Route path="/agb" element={<AGB />} />
+              <Route path="/privacy" element={<PrivacySettings />} />
             </Routes>
             <Footer />
             <CookieConsent />
