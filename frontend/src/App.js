@@ -1353,6 +1353,7 @@ const App = () => {
                 <Route path="/agb" element={<AGB />} />
                 <Route path="/privacy" element={<PrivacySettings />} />
               </Routes>
+              <AdConfigPanel />
               <Footer />
               <CookieConsent />
             </div>
