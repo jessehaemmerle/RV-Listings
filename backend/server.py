@@ -332,7 +332,130 @@ async def get_vehicle_types():
         {"value": "camper_van", "label": "Camper Van"}
     ]
 
-# Stats endpoint
+# DSGVO/Privacy API endpoints
+@api_router.get("/privacy/data-export")
+async def export_user_data(current_user: User = Depends(get_current_user)):
+    """DSGVO Art. 20 - Recht auf Datenübertragbarkeit"""
+    # Collect all user data
+    user_data = {
+        "user_info": {
+            "id": current_user.id,
+            "username": current_user.username,
+            "email": current_user.email,
+            "full_name": current_user.full_name,
+            "phone": current_user.phone,
+            "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            "is_active": current_user.is_active
+        },
+        "listings": [],
+        "export_date": datetime.utcnow().isoformat()
+    }
+    
+    # Get user's listings
+    listings = await db.listings.find({"seller_id": current_user.id}).to_list(1000)
+    for listing in listings:
+        # Remove internal fields
+        listing.pop("_id", None)
+        user_data["listings"].append(listing)
+    
+    return user_data
+
+@api_router.delete("/privacy/delete-account")
+async def delete_user_account(current_user: User = Depends(get_current_user)):
+    """DSGVO Art. 17 - Recht auf Löschung"""
+    try:
+        # Soft delete user account
+        await db.users.update_one(
+            {"id": current_user.id},
+            {
+                "$set": {
+                    "is_active": False,
+                    "deleted_at": datetime.utcnow(),
+                    "username": f"deleted_user_{current_user.id}",
+                    "email": f"deleted_{current_user.id}@deleted.local",
+                    "full_name": "Gelöschter Benutzer",
+                    "phone": None
+                }
+            }
+        )
+        
+        # Deactivate all user's listings
+        await db.listings.update_many(
+            {"seller_id": current_user.id},
+            {
+                "$set": {
+                    "is_active": False,
+                    "deleted_at": datetime.utcnow(),
+                    "seller_name": "Gelöschter Benutzer",
+                    "seller_email": "deleted@deleted.local",
+                    "seller_phone": None
+                }
+            }
+        )
+        
+        return {"message": "Account successfully deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete account: {str(e)}")
+
+@api_router.post("/privacy/data-correction")
+async def request_data_correction(
+    correction_request: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """DSGVO Art. 16 - Recht auf Berichtigung"""
+    # Log data correction request
+    correction_log = {
+        "user_id": current_user.id,
+        "request": correction_request,
+        "timestamp": datetime.utcnow(),
+        "status": "pending"
+    }
+    
+    # In a real application, this would trigger a review process
+    # For now, we'll just log it
+    await db.data_correction_requests.insert_one(correction_log)
+    
+    return {
+        "message": "Datenkorrektur-Anfrage wurde eingereicht und wird bearbeitet",
+        "request_id": str(correction_log["_id"]) if "_id" in correction_log else "unknown"
+    }
+
+@api_router.get("/privacy/consent-status")
+async def get_consent_status(current_user: User = Depends(get_current_user)):
+    """Get user's current consent status"""
+    # This would typically be stored in the database
+    # For now, return a default status
+    return {
+        "necessary": True,
+        "functional": False,
+        "analytics": False,
+        "marketing": False,
+        "last_updated": datetime.utcnow().isoformat()
+    }
+
+@api_router.post("/privacy/update-consent")
+async def update_consent(
+    consent_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """Update user's consent preferences"""
+    # Update consent in database
+    consent_record = {
+        "user_id": current_user.id,
+        "necessary": consent_data.get("necessary", True),
+        "functional": consent_data.get("functional", False),
+        "analytics": consent_data.get("analytics", False),
+        "marketing": consent_data.get("marketing", False),
+        "timestamp": datetime.utcnow()
+    }
+    
+    await db.user_consent.update_one(
+        {"user_id": current_user.id},
+        {"$set": consent_record},
+        upsert=True
+    )
+    
+    return {"message": "Consent preferences updated successfully"}
 @api_router.get("/stats")
 async def get_stats():
     total_listings = await db.listings.count_documents({"is_active": True})
