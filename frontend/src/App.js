@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import './App.css';
 import { TranslationProvider, useTranslation } from './translations/TranslationContext';
 import { useAdConfig } from './components/AdConfig';
-import { BannerAd, SidebarAd, NativeAd } from './components/GoogleAds';
+import { BannerAd, SidebarAd, NativeAd, InFeedAd, SearchResultsAd, MobileStickyAd } from './components/GoogleAds';
 import { AdConfigProvider } from './components/AdConfig';
 import CreateListing from './components/CreateListing';
 import MyListings from './components/MyListings';
