@@ -8,7 +8,7 @@ import { TranslationProvider, useTranslation } from './translations/TranslationC
 import CreateListing from './components/CreateListing';
 import MyListings from './components/MyListings';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 // Fix for default markers in Leaflet
