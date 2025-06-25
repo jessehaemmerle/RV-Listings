@@ -1335,28 +1335,30 @@ const MyListingsPlaceholder = () => {
 const App = () => {
   return (
     <TranslationProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/listings" element={<Listings />} />
-              <Route path="/listings/:id" element={<ListingDetails />} />
-              <Route path="/create-listing" element={<CreateListingPlaceholder />} />
-              <Route path="/my-listings" element={<MyListingsPlaceholder />} />
-              <Route path="/impressum" element={<Impressum />} />
-              <Route path="/datenschutz" element={<Datenschutz />} />
-              <Route path="/agb" element={<AGB />} />
-              <Route path="/privacy" element={<PrivacySettings />} />
-            </Routes>
-            <Footer />
-            <CookieConsent />
-          </div>
-        </Router>
-      </AuthProvider>
+      <AdConfigProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/listings" element={<Listings />} />
+                <Route path="/listings/:id" element={<ListingDetails />} />
+                <Route path="/create-listing" element={<CreateListingPlaceholder />} />
+                <Route path="/my-listings" element={<MyListingsPlaceholder />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/datenschutz" element={<Datenschutz />} />
+                <Route path="/agb" element={<AGB />} />
+                <Route path="/privacy" element={<PrivacySettings />} />
+              </Routes>
+              <Footer />
+              <CookieConsent />
+            </div>
+          </Router>
+        </AuthProvider>
+      </AdConfigProvider>
     </TranslationProvider>
   );
 };
