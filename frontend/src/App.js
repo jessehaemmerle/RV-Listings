@@ -7,6 +7,11 @@ import './App.css';
 import { TranslationProvider, useTranslation } from './translations/TranslationContext';
 import CreateListing from './components/CreateListing';
 import MyListings from './components/MyListings';
+import CookieConsent from './components/CookieConsent';
+import Impressum from './components/Impressum';
+import Datenschutz from './components/Datenschutz';
+import AGB from './components/AGB';
+import PrivacySettings from './components/PrivacySettings';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
@@ -142,6 +147,9 @@ const Navbar = () => {
                 </Link>
                 <Link to="/my-listings" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
                   {t('nav.myListings')}
+                </Link>
+                <Link to="/privacy" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                  🔒 Datenschutz
                 </Link>
                 <div className="relative">
                   <button
@@ -898,7 +906,70 @@ const ListingDetails = () => {
   );
 };
 
-// Simple placeholder components for other pages
+// Footer Component with Legal Links
+const Footer = () => {
+  const { t } = useTranslation();
+
+  return (
+    <footer className="bg-gray-800 text-white mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Wohnmobil-Kleinanzeigen</h3>
+            <p className="text-gray-300 text-sm">
+              Ihre Plattform für Wohnmobile, Wohnwagen und Campervans in Österreich.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-md font-semibold mb-4">Schnellzugriff</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/listings" className="text-gray-300 hover:text-white">Anzeigen durchsuchen</Link></li>
+              <li><Link to="/create-listing" className="text-gray-300 hover:text-white">Anzeige erstellen</Link></li>
+              <li><Link to="/register" className="text-gray-300 hover:text-white">Registrieren</Link></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-md font-semibold mb-4">Rechtliches</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/impressum" className="text-gray-300 hover:text-white">Impressum</Link></li>
+              <li><Link to="/datenschutz" className="text-gray-300 hover:text-white">Datenschutz</Link></li>
+              <li><Link to="/agb" className="text-gray-300 hover:text-white">AGB</Link></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="text-md font-semibold mb-4">Kontakt</h4>
+            <div className="text-gray-300 text-sm space-y-1">
+              <p>E-Mail: info@[ihre-domain].at</p>
+              <p>Telefon: +43 [IHRE NUMMER]</p>
+              <p>Adresse: [IHRE ADRESSE]</p>
+              <p>[PLZ] [ORT], Österreich</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-700 mt-8 pt-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} [IHR FIRMENNAME]. Alle Rechte vorbehalten.
+            </p>
+            <div className="flex space-x-4 mt-4 md:mt-0">
+              <span className="text-gray-400 text-xs">🇦🇹 Made in Austria</span>
+              <span className="text-gray-400 text-xs">🔒 DSGVO-konform</span>
+              <span className="text-gray-400 text-xs">🛡️ SSL-verschlüsselt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
 const CreateListingPlaceholder = () => {
   const { t } = useTranslation();
   return <CreateListing />;
@@ -924,7 +995,13 @@ const App = () => {
               <Route path="/listings/:id" element={<ListingDetails />} />
               <Route path="/create-listing" element={<CreateListingPlaceholder />} />
               <Route path="/my-listings" element={<MyListingsPlaceholder />} />
+              <Route path="/impressum" element={<Impressum />} />
+              <Route path="/datenschutz" element={<Datenschutz />} />
+              <Route path="/agb" element={<AGB />} />
+              <Route path="/privacy" element={<PrivacySettings />} />
             </Routes>
+            <Footer />
+            <CookieConsent />
           </div>
         </Router>
       </AuthProvider>
