@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './App.css';
 import { TranslationProvider, useTranslation } from './translations/TranslationContext';
+import { AdConfigProvider } from './components/AdConfig';
 import CreateListing from './components/CreateListing';
 import MyListings from './components/MyListings';
 import CookieConsent from './components/CookieConsent';
